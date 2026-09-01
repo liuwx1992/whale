@@ -1,0 +1,41 @@
+spring:
+  redis:
+    etcdEndpoint: http://etcd-speed-01-pre.brapp.com:23790,http://etcd-speed-02-pre.brapp.com:23790,http://etcd-speed-03-pre.brapp.com:23790
+    retryWaitTimeMillis: 100
+    maxConnection: 6
+    socketOptions:
+      connectTimeout: 5000
+    multiple:
+      - name: redis1
+        password: ba-api-count-pwd
+        timeout: 5000
+        max-attempts: 3
+        codec: string.utf8
+        proxy-uri: redis://ba-4-api-count-pre.brapp.com:6400
+        gray-proxy-uri: redis://ba-4-api-count-pre.brapp.com:7400
+        proxy-id: camellia-ba
+      - name: redis2
+        password: ba-huaxiang-pwd
+        timeout: 5000
+        max-attempts: 3
+        codec: string.utf8
+        proxy-uri: redis://ba-5-huaxiang-pre.brapp.com:6400
+        gray-proxy-uri: redis://ba-5-huaxiang-pre.brapp.com:7400
+        proxy-id: camellia-ba
+      - name: redis3
+        password: ba-huaxiang-pwd
+        timeout: 5000
+        max-attempts: 3
+        codec: string.utf8
+        proxy-uri: redis://ba-5-huaxiang-pre.brapp.com:6400
+        gray-proxy-uri: redis://ba-5-huaxiang-pre.brapp.com:7400
+        proxy-id: camellia-ba
+      - name: redis4
+        password: ba-huaxiang-pwd
+        timeout: 5000
+        max-attempts: 3
+        codec: string.utf8
+        proxy-uri: redis://ba-5-huaxiang-pre.brapp.com:6400
+        gray-proxy-uri: redis://ba-5-huaxiang-pre.brapp.com:7400
+        proxy-id: camellia-ba
+

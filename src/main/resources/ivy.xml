@@ -1,0 +1,5 @@
+<ivy-module>
+    <dependencies>
+        <dependency org="io.lettuce" name="lettuce-core" rev="5.2.1.RELEASE"/>
+    </dependencies>
+</ivy-module>
