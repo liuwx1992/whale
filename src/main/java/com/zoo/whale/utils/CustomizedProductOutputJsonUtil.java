@@ -6,9 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 定制化产品输出层级 JSON 生成工具。
@@ -21,6 +19,41 @@ public final class CustomizedProductOutputJsonUtil {
     private static final String MOCK_VALUE = "1";
     private static final String MOCK_CODE_VALUE = "00";
     private static final String MOCK_SW = "999333_20260920143459_23453A4E0";
+    private static final Map<String, Integer> TIME_SLICE_DAYS;
+    private static final Set<String> CHANGE_FIELDS;
+
+    static {
+        Map<String, Integer> timeSliceDays = new HashMap<>();
+        timeSliceDays.put("d1", 1);
+        timeSliceDays.put("d3", 3);
+        timeSliceDays.put("d7", 7);
+        timeSliceDays.put("d15", 15);
+        timeSliceDays.put("m1", 30);
+        timeSliceDays.put("m2", 60);
+        timeSliceDays.put("m3", 90);
+        timeSliceDays.put("m4", 120);
+        timeSliceDays.put("m5", 150);
+        timeSliceDays.put("m6", 180);
+        timeSliceDays.put("m7", 210);
+        timeSliceDays.put("m8", 240);
+        timeSliceDays.put("m9", 270);
+        timeSliceDays.put("m10", 300);
+        timeSliceDays.put("m11", 330);
+        timeSliceDays.put("m12", 360);
+        timeSliceDays.put("m15", 450);
+        timeSliceDays.put("m18", 540);
+        timeSliceDays.put("m21", 630);
+        timeSliceDays.put("m24", 720);
+        timeSliceDays.put("m36", 1080);
+        TIME_SLICE_DAYS = Collections.unmodifiableMap(timeSliceDays);
+
+        CHANGE_FIELDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+                "allnum_change",
+                "orgnum_change",
+                "allnum_change_ratio",
+                "orgnum_change_ratio"
+        )));
+    }
 
     private CustomizedProductOutputJsonUtil() {
     }
@@ -116,11 +149,13 @@ public final class CustomizedProductOutputJsonUtil {
         productNode.set("id", idNode);
         productNode.set("cell", cellNode);
 
+        int maxTimeSliceDays = getMaxTimeSliceDays(timeSlicesNode);
         for (JsonNode timeSliceNode : timeSlicesNode) {
+            String timeSlice = timeSliceNode.asText();
             ObjectNode idTimeSliceNode = MAPPER.createObjectNode();
             ObjectNode cellTimeSliceNode = MAPPER.createObjectNode();
-            idNode.set(timeSliceNode.asText(), idTimeSliceNode);
-            cellNode.set(timeSliceNode.asText(), cellTimeSliceNode);
+            idNode.set(timeSlice, idTimeSliceNode);
+            cellNode.set(timeSlice, cellTimeSliceNode);
 
             orgGroupFields = orgGroupsNode.fields();
             while (orgGroupFields.hasNext()) {
@@ -132,6 +167,9 @@ public final class CustomizedProductOutputJsonUtil {
 
                 for (JsonNode fieldNode : fieldsNode) {
                     String field = fieldNode.asText();
+                    if (isChangeField(field) && isMaxTimeSlice(timeSlice, maxTimeSliceDays)) {
+                        continue;
+                    }
                     idOrgGroupNode.put(field, MOCK_VALUE);
                     cellOrgGroupNode.put(field, MOCK_VALUE);
                 }
@@ -145,4 +183,29 @@ public final class CustomizedProductOutputJsonUtil {
             throw new IllegalStateException("生成输出 JSON 失败", e);
         }
     }
+
+    private static int getMaxTimeSliceDays(JsonNode timeSlicesNode) {
+        int maxDays = -1;
+        for (JsonNode timeSliceNode : timeSlicesNode) {
+            int days = getTimeSliceDays(timeSliceNode.asText());
+            if (days > maxDays) {
+                maxDays = days;
+            }
+        }
+        return maxDays;
+    }
+
+    private static boolean isMaxTimeSlice(String timeSlice, int maxTimeSliceDays) {
+        int days = getTimeSliceDays(timeSlice);
+        return days != 0 && days >= maxTimeSliceDays;
+    }
+
+    private static boolean isChangeField(String field) {
+        return CHANGE_FIELDS.contains(field);
+    }
+
+    private static int getTimeSliceDays(String timeSlice) {
+        return TIME_SLICE_DAYS.getOrDefault(timeSlice, 0);
+    }
+
 }
