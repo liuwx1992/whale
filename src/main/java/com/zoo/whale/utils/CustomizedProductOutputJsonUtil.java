@@ -137,7 +137,7 @@ public final class CustomizedProductOutputJsonUtil {
         result.put("code", MOCK_CODE_VALUE);
 
         ObjectNode flagNode = MAPPER.createObjectNode();
-        flagNode.put("flag_" + code.toLowerCase(Locale.ROOT), MOCK_VALUE);
+        flagNode.put(code.toLowerCase(Locale.ROOT), MOCK_VALUE);
         result.set("Flag", flagNode);
 
         // 按 code -> id/cell -> timeSlice -> orgGroup -> field 逐层构建产品输出结构。
